@@ -1,3 +1,5 @@
+const doneCssClass = "done";
+
 export default class HtmlService {
     
     constructor(todoService) {
@@ -33,10 +35,27 @@ export default class HtmlService {
         console.log(tasks);
     }
 
+    getTaskId(listItem) {
+        return +listItem.getAttribute('data-item-id');        // + convert from string to integer
+    }
+
     async deleteTask(listItem) {
-        const taskId = +listItem.getAttribute('data-item-id');        // + convert from string to integer
+        const taskId = this.getTaskId(listItem);
         await this.todoService.delete(taskId);
         listItem.remove();
+    }
+
+    async saveTask(taskId, isDone) {
+        const task = await this.todoService.get(taskId);
+        task.done = isDone;
+        await this.todoService.save(task);
+    }
+
+    toggleTask(listItem) {
+        const taskId = this.getTaskId(listItem);
+        listItem.classList.toggle('done');
+        const isDone = listItem.classList.contains(doneCssClass);
+        this.saveTask(taskId, isDone);
     }
 
     addToHtmlList(task) {
@@ -47,22 +66,22 @@ export default class HtmlService {
         const button = document.createElement('button');
 
         li.setAttribute('data-item-id', task.id);
+        li.addEventListener('click', () => this.toggleTask(li))
+        if(task.done) {
+            li.classList.add(doneCssClass);
+        }
+        
         span.textContent = task.description;
         
         button.textContent = 'x';
         button.addEventListener('click', (event) => {
-            event.preventDefault();
+            event.stopPropagation();
             this.deleteTask(li);
-        })
-
-        if(task.done) {
-            li.classList.add('done');
-        }
+        });
 
         li.appendChild(span);
         li.appendChild(button);
         ul.appendChild(li);
-
     }
 
   }
