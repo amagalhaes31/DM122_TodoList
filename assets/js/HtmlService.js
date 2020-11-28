@@ -33,6 +33,12 @@ export default class HtmlService {
         console.log(tasks);
     }
 
+    async deleteTask(listItem) {
+        const taskId = +listItem.getAttribute('data-item-id');        // + convert from string to integer
+        await this.todoService.delete(taskId);
+        listItem.remove();
+    }
+
     addToHtmlList(task) {
 
         const ul = document.querySelector('ul');
@@ -42,7 +48,12 @@ export default class HtmlService {
 
         li.setAttribute('data-item-id', task.id);
         span.textContent = task.description;
+        
         button.textContent = 'x';
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            this.deleteTask(li);
+        })
 
         if(task.done) {
             li.classList.add('done');
