@@ -1,4 +1,5 @@
 const doneCssClass = "done";
+const dataItemId = "data-item-id";
 
 export default class HtmlService {
     
@@ -36,11 +37,10 @@ export default class HtmlService {
     }
 
     getTaskId(listItem) {
-        return +listItem.getAttribute('data-item-id');        // + convert from string to integer
+        return +listItem.getAttribute(dataItemId);        // + convert from string to integer
     }
 
-    async deleteTask(listItem) {
-        const taskId = this.getTaskId(listItem);
+    async deleteTask(listItem, taskId) {
         await this.todoService.delete(taskId);
         listItem.remove();
     }
@@ -51,9 +51,8 @@ export default class HtmlService {
         await this.todoService.save(task);
     }
 
-    toggleTask(listItem) {
-        const taskId = this.getTaskId(listItem);
-        listItem.classList.toggle('done');
+    toggleTask(listItem, taskId) {
+        listItem.classList.toggle(doneCssClass);
         const isDone = listItem.classList.contains(doneCssClass);
         this.saveTask(taskId, isDone);
     }
@@ -65,8 +64,7 @@ export default class HtmlService {
         const span = document.createElement('span');
         const button = document.createElement('button');
 
-        li.setAttribute('data-item-id', task.id);
-        li.addEventListener('click', () => this.toggleTask(li))
+        li.addEventListener('click', () => this.toggleTask(li, task.id))
         if(task.done) {
             li.classList.add(doneCssClass);
         }
@@ -76,7 +74,7 @@ export default class HtmlService {
         button.textContent = 'x';
         button.addEventListener('click', (event) => {
             event.stopPropagation();
-            this.deleteTask(li);
+            this.deleteTask(li, task.id);
         });
 
         li.appendChild(span);
